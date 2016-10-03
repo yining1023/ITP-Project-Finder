@@ -9,7 +9,7 @@ function getInput(event) {
 function getProjects(userInput) {
   $.ajax({
     type: "GET",
-    url: "https://itp.nyu.edu/ranch/api/projects-finder/" + userInput,
+    url: "" + userInput,
     failure: function(err){
       return alert ("Sorry, we could not find any data from api.");
     },
@@ -33,7 +33,7 @@ function findName(obj) {
     $.ajax({
       type: "GET",
       indexValue: i,
-      url: "https://itp.nyu.edu/ranch/api/people/" + obj[i].user,
+      url: "" + obj[i].user,
       failure: function(err){
         return console.log("Sorry, we could not find name for this netID.");
       },
