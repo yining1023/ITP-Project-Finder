@@ -9,7 +9,7 @@ function getInput(event) {
 function getProjects(userInput) {
   $.ajax({
     type: "GET",
-    url: "" + userInput,
+    url: "https://itp.nyu.edu/ranch/api/projects-finder/" + userInput,
     failure: function(err){
       return alert ("Sorry, we could not find any data from api.");
     },
@@ -18,7 +18,10 @@ function getProjects(userInput) {
       if (obj.length === 0) {
         return alert ("Sorry, we could not find any project. Please try other keywords");
       } else {
-        return findName(obj);
+        findName(obj);
+        addCard(obj);
+        showProject(projectsList);
+        addSubUrl();
       }
     }
   });
@@ -30,7 +33,7 @@ function findName(obj) {
     $.ajax({
       type: "GET",
       indexValue: i,
-      url: "" + obj[i].user,
+      url: "https://itp.nyu.edu/ranch/api/people/" + obj[i].user,
       failure: function(err){
         return console.log("Sorry, we could not find name for this netID.");
       },
@@ -41,8 +44,6 @@ function findName(obj) {
           var nameObj = JSON.parse(nameinfo);
           var creatorName = nameObj.official_name;
           obj[i].creatorName = creatorName;
-          addCard(obj);
-          return showProject(projectsList);
         }
       }
     });
@@ -50,6 +51,7 @@ function findName(obj) {
 }
 
 function addCard(obj) {
+  console.log('run addcard');
   $("#card-holder").empty();
   $("#mainImage").empty();
   for (var i = 0; i < obj.length; i++) {
@@ -67,7 +69,7 @@ function addCard(obj) {
     // add content to the image card
     var htmlToAppend = 
     "<div class='card-container col-sm-4 col-md-4 centered'>"+
-      "<div class='card overlay white' data-toggle='modal' data-target='#exampleModal' href='#lala'>"+
+      "<div class='card overlay white' data-toggle='modal' data-target='#exampleModal'>"+
         "<div class='card-text'>"+
           '<h3>'+obj[i].name+'</h3>'+
           '<h4>'+thisCreatorName+'</h4>'+
@@ -89,12 +91,13 @@ function addCard(obj) {
     var cards = document.getElementsByClassName('card');
     var thisCard = cards[cards.length-1];
     thisCard.setAttribute("data-whatever", obj[i].id);
+    thisCard.setAttribute("href", obj[i].name);
   }
   projectsList = obj;
-  return projectsList;
 }
 
 function showProject(projectsList) {
+  console.log('run show projects');
   $('#exampleModal').on('show.bs.modal', function (event) {
     var button = $(event.relatedTarget) // Button that triggered the modal
     var projectId = button.data('whatever') // Extract info from data-* attributes
@@ -104,7 +107,6 @@ function showProject(projectsList) {
     // Use projectId to find all infos in the projectsList
     for (var j = 0; j < projectsList.length; j++) {
       if (projectId == projectsList[j].id) {
-        console.log(projectsList[j].name);
         // add content to the overlay modal
         if (projectsList[j].keywords == null) {
           var keywords = '';
@@ -132,6 +134,33 @@ function showProject(projectsList) {
       }
     }
   })
+}
+
+function addSubUrl() {
+  console.log('run addsuburl');
+  $(window.location.hash).modal('show');
+  $('div[data-toggle="modal"]').click(function(){
+    window.location.hash = $(this).attr('href');
+  });
+
+  $('button[data-dismiss="modal"]').click(function(){
+    var original = window.location.href.substr(0, window.location.href.indexOf('#'))
+    history.replaceState({}, document.title, original);
+  });
+
+  $(window.location.hash).modal('show');
+  $('a[data-toggle="modal"]').click(function(){
+    window.location.hash = $(this).attr('href');
+  });
+
+  $('.modal').on('hidden.bs.modal', function () {
+    revertToOriginalURL();
+  });
+}
+
+function revertToOriginalURL() {
+  var original = window.location.href.substr(0, window.location.href.indexOf('#'))
+  history.replaceState({}, document.title, original);
 }
 
 document.getElementById('theInput').addEventListener('change', getInput);
