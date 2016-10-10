@@ -1,49 +1,86 @@
-var projectsList;
+var projectsByKey;
+var allProjects;
+var noProjByKey = false;
 
 function getInput(event) {
   var val = document.getElementById('theInput').value;
-  if(!val || val=="") return alert("Enter a keyword");
-  getProjects(val);
+  if(!val || val=="") return $('#noResult').html('Please type some keywords.');
+  $("#card-holder").empty();
+  $('#noResult').html('');
+  allProjects = [];
+  projectsByKey = [];
+  projectsByAuthor = [];
+  getProjectsByKey(val);
+  getProjectsByAuthor(val);
 }
 
-function getProjects(userInput) {
+function getProjectsByKey(userInput) {
   $.ajax({
     type: "GET",
-    url: "" + userInput,
+    url: "https://itp.nyu.edu/ranch/api/projects-finder/" + userInput,
     failure: function(err){
-      return alert ("Sorry, we could not find any data from api.");
+      return console.log("Sorry, we could not find any data from api search by keywords.");
     },
     success: function(data) {
       var obj = JSON.parse(data);
       if (obj.length === 0) {
-        return alert ("Sorry, we could not find any project. Please try other keywords");
+        // $('#noResult').html('Sorry, we could not find any project. Please try other keywords.');
+        console.log ("Sorry, we could not find any project. Please try other keywords");
+        noProjByKey = true;
       } else {
-        findName(obj);
-        addCard(obj);
-        showProject(projectsList);
+        // findName(obj);
+        $('#noResult').html('');
+        projectsByKey = obj;
+        allProjects = projectsByKey;
+        addCard(allProjects);
+        showProject(allProjects);
         addSubUrl();
       }
     }
   });
 }
 
-function findName(obj) {
-  var creatorNames = [];
-  for (var i = 0; i < obj.length; i++) {
+function getProjectsByAuthor(userInput) {
+  $.ajax({
+    type: "GET",
+    url: "https://itp.nyu.edu/ranch/api/projects-finder-by-creator/" + userInput,
+    failure: function(err){
+      return console.log("Sorry, we could not find any data from api search by author.");
+    }, 
+    success: function(data) {
+      var objAuthor = JSON.parse(data);
+      if (objAuthor.length === 0) {
+        console.log ("Sorry, we could not find any project. Please try other names");
+        if (noProjByKey) {
+          $('#noResult').html('Sorry, we could not find any project. Please try other keywords/names.');
+        }
+      } else {
+        getProjectById(objAuthor);
+      }
+    }
+  });
+}
+
+function getProjectById(objAuthor) {
+  for (var i = 0; i < objAuthor.length; i++) {
     $.ajax({
       type: "GET",
       indexValue: i,
-      url: "" + obj[i].user,
+      url: "https://itp.nyu.edu/ranch/api/projects/" + objAuthor[i].id,
       failure: function(err){
-        return console.log("Sorry, we could not find name for this netID.");
+        return console.log("Sorry, we could not find project information for this project id.");
       },
-      success: function(nameinfo) {
-        getCreatorName(nameinfo, this.indexValue);
+      success: function(moreProjects) {
+        return getCreatorName(moreProjects, this.indexValue);
 
-        function getCreatorName(nameinfo, i) {
-          var nameObj = JSON.parse(nameinfo);
-          var creatorName = nameObj.official_name;
-          obj[i].creatorName = creatorName;
+        function getCreatorName(moreProjects, i) {
+          var moreProjectsObj = JSON.parse(moreProjects);
+          allProjects = allProjects.concat(moreProjectsObj);
+          if (i === objAuthor.length - 1) {
+            addCard(allProjects);
+            showProject(allProjects);
+            addSubUrl();
+          }
         }
       }
     });
@@ -51,37 +88,47 @@ function findName(obj) {
 }
 
 function addCard(obj) {
-  console.log('run addcard');
+  console.log('add card');
   $("#card-holder").empty();
   $("#mainImage").empty();
-  for (var i = 0; i < obj.length; i++) {
+  obj.sort(function(a, b) {
+    return new Date(a.time) - new Date(b.time);
+  });
+  var i = obj.length - 1;
+  for (i = obj.length - 1; i >= 0; i--) {
     if (obj[i].keywords == null) {
       var keywords = '';
     } else {
       var keywords = obj[i].keywords;
     }
-    if (obj[i].creatorName == undefined) {
+    if (obj[i].preferred_name == undefined) {
       var thisCreatorName = obj[i].user;
     } else {
-      var thisCreatorName = obj[i].creatorName;
+      var thisCreatorName = obj[i].preferred_name;
     }
 
     // add content to the image card
     var htmlToAppend = 
     "<div class='card-container col-sm-4 col-md-4 centered'>"+
       "<div class='card overlay white' data-toggle='modal' data-target='#exampleModal'>"+
+        "<div class='bg'></div>"+
         "<div class='card-text'>"+
           '<h3>'+obj[i].name+'</h3>'+
           '<h4>'+thisCreatorName+'</h4>'+
+          '<p>'+obj[i].time+'</p>'+
           '<p>'+keywords+'</p>'+
         "</div>"+
       '</div>'+
     '</div>';
     $('#card-holder').append(htmlToAppend);
 
-    var cards = document.getElementsByClassName('card');
-    var imgUrl = 'url(' + obj[i].main_img + ')';
-    if (obj[i].main_img !== false) {
+    var cards = document.getElementsByClassName('bg');
+    if (obj[i].main_img !== false && obj[i].main_img !== null && obj[i].main_img!== undefined) {
+      if (obj[i].main_img.startsWith('https://itp.nyu.edu/projects_documents/')) {
+        var imgUrl = 'url(' + obj[i].main_img + ')';
+      } else {
+        var imgUrl = 'url(' + 'https://itp.nyu.edu/projects_documents/' + obj[i].main_img + ')';
+      }
       cards[cards.length-1].style.backgroundImage = imgUrl;
     } else {
       cards[cards.length-1].style.backgroundColor = 'white';
@@ -93,7 +140,29 @@ function addCard(obj) {
     thisCard.setAttribute("data-whatever", obj[i].id);
     thisCard.setAttribute("href", obj[i].name);
   }
-  projectsList = obj;
+  if (i <= -1 && obj.length > 9) {
+    loadMore();
+    console.log('in loadmore');
+  }
+}
+
+function loadMore(){
+  $("#loadMore").show();
+  $("#loadMoreText").show();
+
+  $(".card-container").hide();
+  $(".card-container").slice(0, 9).show();
+
+  $("#loadMore").on('click', function (e) {
+    e.preventDefault();
+    $(".card-container:hidden").slice(0, 9).slideDown();
+    if ($(".card-container:hidden").length == 0) {
+      $("#load").fadeOut('slow');
+    }
+    $('html,body').animate({
+      scrollTop: $(this).offset().top
+    }, 1500);
+  });
 }
 
 function showProject(projectsList) {
@@ -108,27 +177,60 @@ function showProject(projectsList) {
     for (var j = 0; j < projectsList.length; j++) {
       if (projectId == projectsList[j].id) {
         // add content to the overlay modal
-        if (projectsList[j].keywords == null) {
-          var keywords = '';
+        if (projectsList[j].keywords !== null && projectsList[j].length > 0) {
+          var keywords = '<b>Keywords: </b>' + projectsList[j].keywords;
         } else {
-          var keywords = projectsList[j].keywords;
+          var keywords = '';
         }
-        if (projectsList[j].creatorName == undefined) {
+
+        if (projectsList[j].preferred_name == undefined) {
           var thisCreatorName = projectsList[j].user;
         } else {
-          var thisCreatorName = projectsList[j].creatorName;
+          var thisCreatorName = projectsList[j].preferred_name;
+        }
+
+        if (projectsList[j].proj_url !== null && projectsList[j].proj_url.length > 0
+          && projectsList[j].proj_url !== 'http://'
+          && projectsList[j].proj_url !== 'TBD') {
+          var projectUrl = document.createElement("a");
+          projectUrl.setAttribute('href', projectsList[j].proj_url);
+          projectUrl.setAttribute('target', "_blank");
+          projectUrl.innerHTML = projectsList[j].proj_url;
+          $('#projectUrl').html('<b>Project URL: </b>')
+          $('#projectUrl').append(projectUrl);
+        } else {
+          $('#projectUrl').html('');
+        }
+
+
+        if (projectsList[j].video_url !== null && projectsList[j].video_url !== 'http://') {
+          var videoUrl = document.createElement("a");
+          videoUrl.setAttribute('href', projectsList[j].video_url);
+          videoUrl.setAttribute('target', "_blank");
+          videoUrl.innerHTML = projectsList[j].video_url;
+          $('#videoUrl').html('<b>Video URL: </b>')
+          $('#videoUrl').append(videoUrl);
+        } else {
+          $('#videoUrl').html('');
         }
 
         $('#exampleModalLabel').html(projectsList[j].name);
         $('#author').html(thisCreatorName);
-        $('#keywords').html('<b>Keywords: </b>' + keywords);
-        if (projectsList[j].main_img !== false) {
+        $('#time').html(projectsList[j].time);
+        $('#keywords').html(keywords);
+
+        if (projectsList[j].main_img !== false && projectsList[j].main_img !== undefined) {
           var img = document.createElement("IMG");
-          img.src = projectsList[j].main_img;
+          if (projectsList[j].main_img.startsWith('https://itp.nyu.edu/projects_documents/')) {
+            img.src = projectsList[j].main_img;
+          } else {
+            img.src = 'https://itp.nyu.edu/projects_documents/' + projectsList[j].main_img;
+          }
           $('#mainImage').html(img);
         } else {
           $('#mainImage').html('');
         }
+
         $('#pitch').html('<b>Elevator Pitch:</b>  </br>' + projectsList[j].elevator_pitch);
         $('#description').html('<b>Description:</b>  </br>' + projectsList[j].description);
       }
@@ -163,4 +265,26 @@ function revertToOriginalURL() {
   history.replaceState({}, document.title, original);
 }
 
+$('#wearable').click(function(){ getProjectsByKey('wearable'); return false; });
+$('#pcomp').click(function(){ getProjectsByKey('Physical Computing'); return false; });
+$('#computArt').click(function(){ getProjectsByKey('Computational Art'); return false; });
+$('#storytelling').click(function(){ getProjectsByKey('storytelling'); return false; });
+$('#thesis').click(function(){ getProjectsByKey('thesis'); return false; });
+
 document.getElementById('theInput').addEventListener('change', getInput);
+
+$(window).scroll(function () {
+  if ($(this).scrollTop() > 50) {
+    $('.totop a').fadeIn();
+  } else {
+    $('.totop a').fadeOut();
+  }
+});
+
+$(document).ready(function () {
+    $(document).ajaxStart(function () {
+      $(".se-pre-con").fadeIn();
+    }).ajaxStop(function () {
+      $(".se-pre-con").fadeOut();
+    });
+});
