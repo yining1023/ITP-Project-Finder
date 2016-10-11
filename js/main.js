@@ -1,5 +1,5 @@
-var projectsByKey;
-var allProjects;
+var projectsByKey = [];
+var allProjects = [];
 var noProjByKey = false;
 
 function getInput(event) {
@@ -9,7 +9,6 @@ function getInput(event) {
   $('#noResult').html('');
   allProjects = [];
   projectsByKey = [];
-  projectsByAuthor = [];
   getProjectsByKey(val);
   getProjectsByAuthor(val);
 }
@@ -19,13 +18,14 @@ function getProjectsByKey(userInput) {
     type: "GET",
     url: "https://itp.nyu.edu/ranch/api/projects-finder/" + userInput,
     failure: function(err){
-      return console.log("Sorry, we could not find any data from api search by keywords.");
+      // return console.log("Sorry, we could not find any data from api search by keywords.");
+      return;
     },
     success: function(data) {
       var obj = JSON.parse(data);
       if (obj.length === 0) {
         // $('#noResult').html('Sorry, we could not find any project. Please try other keywords.');
-        console.log ("Sorry, we could not find any project. Please try other keywords");
+        // console.log ("Sorry, we could not find any project. Please try other keywords");
         noProjByKey = true;
       } else {
         // findName(obj);
@@ -45,14 +45,15 @@ function getProjectsByAuthor(userInput) {
     type: "GET",
     url: "https://itp.nyu.edu/ranch/api/projects-finder-by-creator/" + userInput,
     failure: function(err){
-      return console.log("Sorry, we could not find any data from api search by author.");
+      // return console.log("Sorry, we could not find any data from api search by author.");
+      return;
     }, 
     success: function(data) {
       var objAuthor = JSON.parse(data);
       if (objAuthor.length === 0) {
-        console.log ("Sorry, we could not find any project. Please try other names");
+        // console.log ("Sorry, we could not find any project. Please try other names");
         if (noProjByKey) {
-          $('#noResult').html('Sorry, we could not find any project. Please try other keywords/names.');
+          $('#noResult').html('Sorry, we could not find any matching projects. Please try using whole keywords or full names.');
         }
       } else {
         getProjectById(objAuthor);
@@ -68,7 +69,8 @@ function getProjectById(objAuthor) {
       indexValue: i,
       url: "https://itp.nyu.edu/ranch/api/projects/" + objAuthor[i].id,
       failure: function(err){
-        return console.log("Sorry, we could not find project information for this project id.");
+        // return console.log("Sorry, we could not find project information for this project id.");
+        return;
       },
       success: function(moreProjects) {
         return getCreatorName(moreProjects, this.indexValue);
@@ -88,7 +90,7 @@ function getProjectById(objAuthor) {
 }
 
 function addCard(obj) {
-  console.log('add card');
+  // console.log('add card');
   $("#card-holder").empty();
   $("#mainImage").empty();
   obj.sort(function(a, b) {
@@ -142,7 +144,6 @@ function addCard(obj) {
   }
   if (i <= -1 && obj.length > 9) {
     loadMore();
-    console.log('in loadmore');
   }
 }
 
@@ -159,14 +160,14 @@ function loadMore(){
     if ($(".card-container:hidden").length == 0) {
       $("#load").fadeOut('slow');
     }
-    $('html,body').animate({
-      scrollTop: $(this).offset().top
-    }, 1500);
+    // $('html,body').animate({
+    //   scrollTop: $(this).offset().top
+    // }, 1500);
   });
 }
 
 function showProject(projectsList) {
-  console.log('run show projects');
+  // console.log('run show projects');
   $('#exampleModal').on('show.bs.modal', function (event) {
     var button = $(event.relatedTarget) // Button that triggered the modal
     var projectId = button.data('whatever') // Extract info from data-* attributes
@@ -243,7 +244,7 @@ function showProject(projectsList) {
 }
 
 function addSubUrl() {
-  console.log('run addsuburl');
+  // console.log('run addsuburl');
   $(window.location.hash).modal('show');
   $('div[data-toggle="modal"]').click(function(){
     window.location.hash = $(this).attr('href');
@@ -285,13 +286,19 @@ function debounce(func, wait, immediate) {
 };
 
 function replaceHtml(string_to_replace) {
-  console.log(string_to_replace);
-  return string_to_replace.replace(/&lt;br/g, '').replace(/ \/&gt;/g, '');
+  if (string_to_replace !== null && string_to_replace !== undefined) {
+    return string_to_replace.replace(/&lt;br/g, '').replace(/ \/&gt;/g, '');
+  } else {
+    return "";
+  }
 }
 
 function replaceHtmlDes(string_to_replace) {
-  console.log(string_to_replace);
-  return string_to_replace.replace(/&lt;br \/&gt;&lt;br \/&gt;/g, '<br />');
+  if (string_to_replace !== null && string_to_replace !== undefined) {
+    return string_to_replace.replace(/&lt;br \/&gt;&lt;br \/&gt;/g, '<br />');
+  } else {
+    return "";
+  }
 }
 
 $('#wearable').click(function(){ getProjectsByKey('wearable'); return false; });
