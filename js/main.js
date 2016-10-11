@@ -231,8 +231,12 @@ function showProject(projectsList) {
           $('#mainImage').html('');
         }
 
-        $('#pitch').html('<b>Elevator Pitch:</b>  </br>' + projectsList[j].elevator_pitch);
-        $('#description').html('<b>Description:</b>  </br>' + projectsList[j].description);
+        var pitch = replaceHtml(projectsList[j].elevator_pitch);
+        $('#pitch').html('<b>Elevator Pitch:</b>  <br />' + pitch);
+
+        var des = replaceHtmlDes(projectsList[j].description);
+        des = replaceHtml(des);
+        $('#description').html('<b>Description:</b>  <br />' + des);
       }
     }
   })
@@ -265,13 +269,40 @@ function revertToOriginalURL() {
   history.replaceState({}, document.title, original);
 }
 
+function debounce(func, wait, immediate) {
+  var timeout;
+  return function() {
+    var context = this, args = arguments;
+    var later = function() {
+      timeout = null;
+      if (!immediate) func.apply(context, args);
+    };
+    var callNow = immediate && !timeout;
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+    if (callNow) func.apply(context, args);
+  };
+};
+
+function replaceHtml(string_to_replace) {
+  console.log(string_to_replace);
+  return string_to_replace.replace(/&lt;br/g, '').replace(/ \/&gt;/g, '');
+}
+
+function replaceHtmlDes(string_to_replace) {
+  console.log(string_to_replace);
+  return string_to_replace.replace(/&lt;br \/&gt;&lt;br \/&gt;/g, '<br />');
+}
+
 $('#wearable').click(function(){ getProjectsByKey('wearable'); return false; });
 $('#pcomp').click(function(){ getProjectsByKey('Physical Computing'); return false; });
 $('#computArt').click(function(){ getProjectsByKey('Computational Art'); return false; });
 $('#storytelling').click(function(){ getProjectsByKey('storytelling'); return false; });
 $('#thesis').click(function(){ getProjectsByKey('thesis'); return false; });
 
-document.getElementById('theInput').addEventListener('change', getInput);
+// document.getElementById('theInput').addEventListener('keyup', getInput);
+$('input').keyup(debounce(function(){ getInput();}, 500));
+$('#searchBtn').click(function(){ getInput; return false; });
 
 $(window).scroll(function () {
   if ($(this).scrollTop() > 50) {

@@ -68,11 +68,16 @@ h1 {
   border-radius: 2px;
   -moz-box-shadow: 0 2px 3px rgba(0,0,0,.05);
   -webkit-box-shadow: 0 2px 3px rgba(0,0,0,.05);
-  box-shadow: 0 2px 3px rgba(0,0,0,.05);
+  box-shadow: 0 2px 3px rgba(0,0,0,.1);
   -moz-box-sizing: border-box;
   box-sizing: border-box;
-  height: 230px;
+  height: 260px;
   cursor: pointer;
+  transition: .3s all ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 5px -2px rgba(0,0,0,.3),0 7px 10px 1px rgba(0,0,0,.24),0 2px 16px 1px rgba(0,0,0,.22);
 }
 
 .bg {
@@ -96,10 +101,6 @@ h1 {
   opacity: 0;
 }
 
-.white:after {
-  background-color: white;
-}
-
 .overlay:after {
   position: absolute;
   border-radius: 2px;
@@ -111,31 +112,48 @@ h1 {
   opacity: 0.3;
 }
 
-.card-text {
-  background: rgba(255, 255, 255, .9);
-  color: #000;/*#404d5f;*/
-}
-
 .card h3{
-	/*color: #404d5f;*/
+  /*color: #404d5f;*/
   font-weight: 100;
 }
 
 .card h4 {
-  /*color: #979ea9;*/
   margin: 0;
   margin-top: 10px;
   font-weight: 100;
 }
 
 .card p {
-  /*color: #979ea9;*/
-  color: #404d5f;
   margin: 0;
   margin-top: 10px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.card-text {
+  background: rgba(0, 0, 0, .7);
+  color: #fff;
+  bottom: 0;
+  position: absolute;
+  width: 100%;
+}
+
+.card-text h3 {
+  font-size: 1em;
+  text-transform: capitalize !important;
+}
+
+.card-text h4 {
+  font-size: 0.8em;
+  color: #ff5e99;
+}
+
+.card-text p {
+  font-size: 0.67em;
+  color: #eee;
+  margin: 0;
+  padding: 0px 5px 5px 5px;
 }
 
 .modal-title {
@@ -233,13 +251,21 @@ input:focus {
 .button-royal, .button-royal-flat, .button-royal:focus, .button-royal-flat:focus {
   background-color: #f4f4f4;
   border: 1px solid rgb(210, 210, 200);
-  color: #ff5e99;
+  color: rgba(255, 94, 153, 0.65);/*#ff5e99;*/
 }
 
 .button-royal:hover, .button-royal-flat:hover {
-  background-color: #ff5e99;
-  border-color: #ff5e99;
+  background-color: rgba(255, 94, 153, 0.65);
+  border-color: rgba(255, 94, 153, 0.65);
   color: white;
+}
+
+#searchBtn {
+  position: absolute;
+  top: 60%;
+  left: 91%;
+  border: none;
+  font-size: 22px;
 }
 
 .gray {
