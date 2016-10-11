@@ -9,6 +9,7 @@ body {
 }
 
 input{
+  margin-bottom: 1%;
   padding: 15px;
   padding-left: 0px;
   width: 97%;
@@ -262,7 +263,7 @@ input:focus {
 
 #searchBtn {
   position: absolute;
-  top: 60%;
+  top: 55%;
   left: 91%;
   border: none;
   font-size: 22px;
