@@ -9,12 +9,6 @@ body {
   /*min-height: 100%;*/
 }
 
-.main {
-  background: #f4f4f4;
-  min-height: 100%;
-  display: block;
-}
-
 input{
   margin-bottom: 1%;
   padding: 15px;
