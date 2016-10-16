@@ -142,6 +142,7 @@ function addCard(obj) {
     thisCard.setAttribute("data-whatever", obj[i].id);
     thisCard.setAttribute("href", obj[i].name);
   }
+  positionFooter();
   if (i <= -1 && obj.length > 9) {
     loadMore();
   }
@@ -160,6 +161,7 @@ function loadMore(){
     if ($(".card-container:hidden").length == 0) {
       $("#load").fadeOut('slow');
     }
+    positionFooter();
     // $('html,body').animate({
     //   scrollTop: $(this).offset().top
     // }, 1500);
@@ -301,6 +303,16 @@ function replaceHtmlDes(string_to_replace) {
   }
 }
 
+function positionFooter(){
+  var obj = $('.footer');
+  if ($("body").outerHeight(true) > $(window).height()) {
+    obj.css("position","relative");
+  } else {
+    obj.css("position","fixed");
+    obj.css("bottom","0px");
+  }
+ }
+
 $('#wearable').click(function(){ getProjectsByKey('wearable'); return false; });
 $('#pcomp').click(function(){ getProjectsByKey('Physical Computing'); return false; });
 $('#computArt').click(function(){ getProjectsByKey('Computational Art'); return false; });
@@ -320,9 +332,9 @@ $(window).scroll(function () {
 });
 
 $(document).ready(function () {
-    $(document).ajaxStart(function () {
-      $(".se-pre-con").fadeIn();
-    }).ajaxStop(function () {
-      $(".se-pre-con").fadeOut();
-    });
+  $(document).ajaxStart(function () {
+    $(".se-pre-con").fadeIn();
+  }).ajaxStop(function () {
+    $(".se-pre-con").fadeOut();
+  });
 });

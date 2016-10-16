@@ -3,9 +3,16 @@
 /**************/
 
 body {
-	background: #f4f4f4;/*#39547c;*/
+	background: #f4f4f4;
 	color: #404d5f;/*#fff*/
 	font-family: 'Muli', sans-serif;
+  /*min-height: 100%;*/
+}
+
+.main {
+  background: #f4f4f4;
+  min-height: 100%;
+  display: block;
 }
 
 input{
@@ -250,7 +257,7 @@ input:focus {
 }
 
 .button-royal, .button-royal-flat, .button-royal:focus, .button-royal-flat:focus {
-  background-color: #f4f4f4;
+  background-color: rgba(255,255,255,0.0);
   border: 1px solid rgb(210, 210, 200);
   color: rgba(255, 94, 153, 0.65);/*#ff5e99;*/
 }
@@ -288,4 +295,24 @@ input:focus {
 
 .keys {
   margin-left: 1.5%;
+}
+
+.footer {
+  position: fixed;
+  margin: 0;
+  bottom: 0;
+  width: 100%;
+  background-color: #e9e9e9;
+  font-size: 0.8em;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.text-muted {
+  color: #818a91!important;
+}
+
+.no-space {
+  padding-top: 0;
+  margin: 0;
 }
