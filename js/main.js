@@ -90,7 +90,7 @@ function getProjectById(objAuthor) {
 }
 
 function addCard(obj) {
-  // console.log('add card');
+  console.log(obj);
   $("#card-holder").empty();
   $("#mainImage").empty();
   obj.sort(function(a, b) {
